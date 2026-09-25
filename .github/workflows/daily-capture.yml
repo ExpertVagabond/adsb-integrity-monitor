@@ -17,8 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Capture 30 minutes (120 polls x 15 s, 100 NM around ACY)
@@ -33,7 +33,7 @@ jobs:
           python -m aim analyze capture-*.jsonl.gz --redact --weather \
             --airspace data/airspace-nyphl.json --registry registry-aircraft.csv \
             --area "100 NM around ACY (daily capture)" --outdir report
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: capture-${{ github.run_id }}
           path: |
