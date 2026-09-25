@@ -4,7 +4,7 @@ import argparse
 import pathlib
 import sys
 
-from . import airspace, feed, htmlreport, registry, report, rtm, watch, weather
+from . import airspace, feed, htmlreport, registry, report, reqif, rtm, watch, weather
 
 
 def main(argv=None):
@@ -49,6 +49,7 @@ def main(argv=None):
     rg.add_argument("--out", required=True)
 
     sub.add_parser("rtm", help="regenerate docs/RTM.md; fails if any requirement is unverified")
+    sub.add_parser("reqif", help="export the requirements and verification links as ReqIF 1.2 (DOORS, Jama, Polarion)")
 
     args = p.parse_args(argv)
 
@@ -100,6 +101,11 @@ def main(argv=None):
             zpath = args.out + ".zip"
             registry.download(zpath)
         print(f"{registry.build(zpath, args.out)} aircraft -> {args.out}")
+        return 0
+
+    if args.cmd == "reqif":
+        path, n = reqif.write(".")
+        print(f"{n} requirements -> {path}")
         return 0
 
     if args.cmd == "rtm":

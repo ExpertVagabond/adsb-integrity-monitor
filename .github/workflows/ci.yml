@@ -24,3 +24,10 @@ jobs:
         run: python -m aim rtm
       - name: Committed RTM matches the code
         run: git diff --exit-code docs/RTM.md
+      - name: ReqIF export is current and valid against the OMG schema
+        run: |
+          python -m aim reqif
+          git diff --exit-code docs/requirements.reqif
+          command -v xmllint || (sudo apt-get update -qq && sudo apt-get install -y -qq libxml2-utils)
+          curl -sSfL -o /tmp/reqif.xsd https://www.omg.org/spec/ReqIF/20110401/reqif.xsd
+          xmllint --noout --schema /tmp/reqif.xsd docs/requirements.reqif

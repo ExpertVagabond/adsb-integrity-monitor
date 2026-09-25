@@ -67,4 +67,5 @@ is left unverified.
 |---|---|---|---|
 | SYS-050 | The build shall generate the traceability matrix from test tags and fail if any requirement is unverified. | T | This document |
 | SYS-051 | Continuous integration shall run the test suite and the traceability gate on every push, and fail if the committed RTM differs from the generated one. | T | This document |
+| SYS-052 | The system shall export every requirement, its section, verification method, source and verifying tests as a ReqIF 1.2 file that validates against the OMG schema, with every internal reference resolving; CI shall fail if the committed export differs from a fresh one. | T | Tool interchange (DOORS, Jama, Polarion) |
 | SYS-060 | The system shall use only the Python standard library at runtime. | I | Architecture 4 |

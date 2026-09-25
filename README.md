@@ -19,13 +19,29 @@ every requirement traced to a test:
 | Document | What it covers |
 |---|---|
 | [01 Concept of Operations](docs/01-ConOps.md) | Purpose, shortfall, users, operational constraints |
-| [02 System Requirements](docs/02-Requirements.md) | 39 numbered "shall" statements with verification method and source |
+| [02 System Requirements](docs/02-Requirements.md) | 40 numbered "shall" statements with verification method and source |
 | [03 Architecture and ICD](docs/03-Architecture-ICD.md) | Components, interface definitions, design decisions |
 | [04 Trade Study](docs/04-Trade-Study.md) | Weighted comparison of five ADS-B data sources, with live measurements |
 | [05 Shortfall Analysis](docs/05-Shortfall-Analysis.md) | Required vs observed ADS-B performance in the New York / Philadelphia area, from a one-hour capture |
 | [06 Safety Risk Assessment](docs/06-Safety-Risk-Assessment.md) | Hazards from trusting the output wrongly, controls, residual risk |
 | [07 Verification Plan](docs/07-Verification-Plan.md) | Test levels, independent validation, open verification gaps |
 | [Traceability Matrix](docs/RTM.md) | Generated from test tags; CI fails if any requirement is unverified |
+| [requirements.reqif](docs/requirements.reqif) | The same requirements and verification links as ReqIF 1.2, importable into DOORS Next, Jama or Polarion; CI validates it against the OMG schema |
+
+### How this maps to FAA acquisition documents
+
+FAA programs follow the Acquisition Management System (AMS). Each document here has an AMS counterpart; programs
+tailor the exact templates.
+
+| AMS artifact | This repository |
+|---|---|
+| Shortfall Analysis | [05 Shortfall Analysis](docs/05-Shortfall-Analysis.md) |
+| Concept of Operations | [01 ConOps](docs/01-ConOps.md) |
+| Preliminary and final Program Requirements (pPR, fPR) | [02 Requirements](docs/02-Requirements.md), exported as [ReqIF](docs/requirements.reqif) |
+| Alternatives analysis | [04 Trade Study](docs/04-Trade-Study.md) |
+| Interface Requirements and Control Documents (IRD, ICD) | [03 Architecture and ICD](docs/03-Architecture-ICD.md) |
+| Safety Risk Management Document (SRMD) | [06 Safety Risk Assessment](docs/06-Safety-Risk-Assessment.md) |
+| Test and Evaluation Master Plan (TEMP) and verification traceability (VRTM) | [07 Verification Plan](docs/07-Verification-Plan.md) and the generated [RTM](docs/RTM.md) |
 
 ## One hour over New York, Philadelphia and Atlantic City
 
@@ -89,6 +105,9 @@ python3 -m aim analyze captures/acy.jsonl --redact --weather --airspace data/air
 
 # live monitoring: alerts on emergencies and on integrity changes, until Ctrl-C
 python3 -m aim watch --lat 39.4576 --lon -74.5772 --radius 60 --redact
+
+# export requirements for a requirements database (ReqIF 1.2)
+python3 -m aim reqif
 
 # tests (set AIM_LIVE=1 to include the live-API test) and the traceability gate
 python3 -m unittest discover -s tests
