@@ -58,10 +58,11 @@ class AnalyzeTests(unittest.TestCase):
         self.assertEqual(a["verdict"], "not evaluable")
         self.assertEqual(a["checks"], [])
 
-    def test_latest_value_wins_across_snapshots(self):
-        # verifies: SYS-002
-        snaps = SNAPS + [{"polled_at": 1010, "feed_time": 1010, "ac": [good("aaa002", nac_p=9, sil=3)]}]
-        r = report.analyze(snaps)
+    def test_indicators_judged_across_snapshots(self):
+        # verifies: SYS-002, SYS-019
+        # One failing poll then two passing polls: the majority value (passing) decides.
+        later = [{"polled_at": t, "feed_time": t, "ac": [good("aaa002", nac_p=9, sil=3)]} for t in (1010, 1020)]
+        r = report.analyze(SNAPS + later)
         self.assertEqual({a["hex"]: a for a in r["aircraft"]}["aaa002"]["verdict"], "pass")
 
     def test_markdown_cites_paragraphs_and_disclaimer(self):
@@ -81,8 +82,66 @@ class AnalyzeTests(unittest.TestCase):
                 rows = list(csv.DictReader(fh))
         self.assertEqual(len(rows), 5)
         row = next(r for r in rows if r["hex"] == "aaa002")
+        self.assertEqual(row["polls_seen"], "1")
         self.assertEqual(row["verdict"], "fail")
         self.assertEqual(row["failed_paragraphs"], "91.227(c)(1)(i); 91.227(c)(1)(v)")
+
+
+class TypicalValueTests(unittest.TestCase):
+    def test_typical_value_is_most_frequent_ties_to_latest(self):
+        # verifies: SYS-019
+        self.assertEqual(report.typical_value([0, 2, 2, 2, 0]), 2)
+        self.assertEqual(report.typical_value([2, 0]), 0)
+        self.assertEqual(report.typical_value([0, 2]), 2)
+        self.assertIsNone(report.typical_value([]))
+
+    def test_flip_flopping_indicator_judged_by_majority_and_noted(self):
+        # verifies: SYS-019
+        # Replays a live ADS-R target whose NACv alternated 0/2 with everything else steady.
+        vals = [0, 2, 0, 2, 2, 2, 0, 2]
+        snaps = [{"polled_at": i, "feed_time": i, "ac": [good("u1", nac_v=v)]} for i, v in enumerate(vals)]
+        a = report.analyze(snaps)["aircraft"][0]
+        self.assertEqual(a["verdict"], "pass")           # 5 of 8 polls say 2
+        self.assertIn("nac_v alternated between 0 and 2", a["unstable"][0])
+        md = report.to_markdown(report.analyze(snaps), "t")
+        self.assertIn("## Informational: unstable indicators", md)
+
+    def test_failure_on_unstable_value_is_marked_low_confidence(self):
+        # verifies: SYS-019
+        vals = [2, 3, 2, 3, 2]  # majority 2 -> fails SIL, but it alternated
+        snaps = [{"polled_at": i, "feed_time": i, "ac": [good("c1", sil=v)]} for i, v in enumerate(vals)]
+        r = report.analyze(snaps)
+        self.assertEqual(r["aircraft"][0]["verdict"], "fail")
+        self.assertIn("unstable: value alternated, low confidence", report.to_markdown(r, "t"))
+
+    def test_version_judged_by_majority(self):
+        # verifies: SYS-017, SYS-019
+        # Replays a CRJ9 from the 1-hour capture: version 2 in 63 polls, version 0 in 5, last poll 0.
+        vals = [2] * 63 + [0] * 5
+        snaps = [{"polled_at": i, "feed_time": i, "ac": [good("crj9", version=v, t="CRJ9")]} for i, v in enumerate(vals)]
+        a = report.analyze(snaps)["aircraft"][0]
+        self.assertEqual(a["version"], 2)
+        self.assertEqual(a["verdict"], "pass")
+        # And a genuinely old transmitter stays not evaluable.
+        old = [{"polled_at": i, "feed_time": i, "ac": [good("old1", version=0)]} for i in range(5)]
+        self.assertEqual(report.analyze(old)["aircraft"][0]["verdict"], "not evaluable")
+
+    def test_single_bad_last_poll_does_not_decide_verdict(self):
+        # verifies: SYS-019
+        snaps = [{"polled_at": i, "feed_time": i, "ac": [good("s1", nic=0 if i == 5 else 8)]} for i in range(6)]
+        self.assertEqual(report.analyze(snaps)["aircraft"][0]["verdict"], "pass")
+
+
+class AdsrReportTests(unittest.TestCase):
+    def test_adsr_converter_zeros_do_not_fail_or_flag_unstable(self):
+        # verifies: SYS-021
+        vals = [0, 2, 0, 2]
+        snaps = [{"polled_at": i, "feed_time": i, "ac": [good("r1", type="adsr_icao", nac_v=v, nic=0)]} for i, v in enumerate(vals)]
+        r = report.analyze(snaps)
+        a = r["aircraft"][0]
+        self.assertEqual(a["verdict"], "pass")
+        self.assertEqual(a["unstable"], [])
+        self.assertIn("Excluded (ADS-R converter)", report.to_markdown(r, "t"))
 
 
 class RedactTests(unittest.TestCase):

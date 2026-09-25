@@ -69,6 +69,59 @@ class CollectTests(unittest.TestCase):
         self.assertEqual(n, 2)
         self.assertTrue(any("fetch failed" in m for m in logs))
 
+    def test_rate_limit_is_retried_with_backoff(self):
+        # verifies: SYS-006
+        import urllib.error
+        calls, waits = {"n": 0}, []
+
+        def limited(*a):
+            calls["n"] += 1
+            if calls["n"] < 3:
+                raise urllib.error.HTTPError("u", 429, "Too Many Requests", {"Retry-After": "7"}, None)
+            return {"ac": []}
+
+        self.assertEqual(feed.fetch_with_retry(limited, 1, 2, 3, sleep=waits.append), {"ac": []})
+        self.assertEqual(waits, [7.0, 7.0])
+
+    def test_gives_up_after_retries_and_never_retries_client_errors(self):
+        # verifies: SYS-006
+        import urllib.error
+        waits = []
+
+        def down(*a):
+            raise urllib.error.HTTPError("u", 503, "Unavailable", {}, None)
+
+        with self.assertRaises(urllib.error.HTTPError):
+            feed.fetch_with_retry(down, sleep=waits.append)
+        self.assertEqual(waits, list(feed.RETRY_DELAYS_S))
+
+        calls = {"n": 0}
+
+        def bad(*a):
+            calls["n"] += 1
+            raise urllib.error.HTTPError("u", 400, "Bad Request", {}, None)
+
+        with self.assertRaises(urllib.error.HTTPError):
+            feed.fetch_with_retry(bad, sleep=lambda s: None)
+        self.assertEqual(calls["n"], 1)
+
+    def test_feed_health_warns_on_collapse(self):
+        # verifies: SYS-007
+        h = feed.FeedHealth()
+        self.assertEqual([h.check(n) for n in (250, 255, 248)], [None, None, None])  # building history
+        self.assertIsNone(h.check(240))                                             # normal variation
+        self.assertIn("0 aircraft this poll vs a recent median of 250", h.check(0))
+        self.assertIn("feed health", h.check(30))
+
+    def test_collect_logs_feed_health_warning(self):
+        # verifies: SYS-007
+        counts = iter([200, 210, 205, 0])
+        logs = []
+        clock = FakeClock()
+        feed.collect(39, -74, 10, 4, 10, self.out, fetcher=lambda *a: {"ac": [{"hex": "x"}] * next(counts)},
+                     sleep=clock.sleep, clock=clock.time, log=logs.append)
+        self.assertTrue(any("feed health" in m for m in logs), logs)
+
     def test_area_validation(self):
         # verifies: SYS-001
         with self.assertRaises(ValueError):

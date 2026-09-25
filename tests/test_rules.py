@@ -85,6 +85,26 @@ class PerformanceTests(unittest.TestCase):
         self.assertFalse(rules.is_surface_vehicle(ac(category="A3", t="B738")))
 
 
+class AdsrTests(unittest.TestCase):
+    def test_adsr_nacv_and_nic_excluded_others_judged(self):
+        # verifies: SYS-021
+        checks = {c["field"]: c["status"] for c in rules.check_performance(ac(type="adsr_icao", nac_v=0, nic=0))}
+        self.assertEqual(checks["nac_v"], rules.EXCLUDED)
+        self.assertEqual(checks["nic"], rules.EXCLUDED)
+        self.assertEqual(checks["nac_p"], rules.PASS)
+
+    def test_adsr_still_fails_on_nacp_and_sil(self):
+        # verifies: SYS-021
+        # Replays the morning C210: NACp 0 and SIL 0 arrive via the FAA path and remain real failures.
+        checks = {c["field"]: c["status"] for c in rules.check_performance(ac(type="adsr_icao", nac_p=0, nac_v=0, nic=0, sil=0))}
+        self.assertEqual((checks["nac_p"], checks["sil"]), (rules.FAIL, rules.FAIL))
+
+    def test_direct_adsb_nacv_zero_still_fails(self):
+        # verifies: SYS-021, SYS-012
+        checks = {c["field"]: c["status"] for c in rules.check_performance(ac(type="adsb_icao", nac_v=0))}
+        self.assertEqual(checks["nac_v"], rules.FAIL)
+
+
 class EmergencyTests(unittest.TestCase):
     def test_emergency_squawks(self):
         # verifies: SYS-020

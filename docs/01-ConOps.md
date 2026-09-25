@@ -37,8 +37,9 @@ AIM runs in three steps:
 2. **Analyze.** For each aircraft seen in direct ADS-B or ADS-R reports, compare its NACp, NACv, NIC, SDA and SIL
    against 91.227(c)(1). Flag emergency codes (91.227(d)(9)). Across snapshots, flag dropouts and physically
    impossible position jumps.
-3. **Report.** Produce a Markdown report that cites the paragraph behind every failure, and a CSV for spreadsheet
-   work.
+3. **Report.** Produce a Markdown report that cites the paragraph behind every failure, a CSV for spreadsheet
+   work, and a self-contained HTML page with a track map. Summarize results by aircraft category, altitude band and
+   ADS-B version, and check each aircraft's two altitudes against the area trend.
 
 ## 4. Users and scenarios
 
@@ -64,5 +65,6 @@ AIM runs in three steps:
 ## 6. Future work
 
 - Add the FAA SWIM Cloud Distribution Service as an authoritative second source and compare the two.
-- Longer captures with statistics by aircraft type, operator and altitude band.
-- Alerting when a watched aircraft degrades mid-flight.
+- Validate positions against an independent measurement (radar or multilateration, e.g. via FAA SWIM). A second public
+  ADS-B network such as OpenSky is not independent: it decodes the same self-reported broadcasts, so agreement
+  between the two would prove nothing about the aircraft.

@@ -1,0 +1,42 @@
+name: daily-capture
+
+# Builds a multi-day sample for free: every day, capture 30 minutes of traffic around ACY on a
+# GitHub runner, analyze it (identities redacted), and keep the capture + report as a build
+# artifact for 90 days. Nothing is committed back to the repository.
+
+on:
+  schedule:
+    - cron: "0 17 * * *"   # 17:00 UTC daily (1 pm Eastern daylight time), a busy afternoon hour
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Capture 30 minutes (120 polls x 15 s, 100 NM around ACY)
+        run: |
+          python -m aim collect --lat 39.4576 --lon -74.5772 --radius 100 --polls 120 --interval 15 \
+            --out "capture-$(date -u +%Y-%m-%d).jsonl"
+          gzip -9 capture-*.jsonl
+      - name: Build registry lookup (aircraft facts only, discarded with the runner)
+        run: python -m aim registry --out registry-aircraft.csv
+      - name: Analyze (redacted, rule airspace, weather check, registry)
+        run: |
+          python -m aim analyze capture-*.jsonl.gz --redact --weather \
+            --airspace data/airspace-nyphl.json --registry registry-aircraft.csv \
+            --area "100 NM around ACY (daily capture)" --outdir report
+      - uses: actions/upload-artifact@v4
+        with:
+          name: capture-${{ github.run_id }}
+          path: |
+            capture-*.jsonl.gz
+            report/
+          retention-days: 90

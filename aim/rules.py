@@ -39,7 +39,15 @@ EMERGENCY_SQUAWKS = {
     "7700": "general emergency",
 }
 
-PASS, FAIL, NOT_REPORTED = "pass", "fail", "not reported"
+PASS, FAIL, NOT_REPORTED, EXCLUDED = "pass", "fail", "not reported", "excluded"
+
+# SYS-021: on ADS-R targets, NACv and NIC can be defaults inserted by the UAT-to-1090 converter
+# some aggregator feeders run, not values the aircraft sent. Verified in source:
+#   mutability uat2esnt.c:410  setbits(esnt_frame+4, 11, 13, 0); // NAVIGATIONAL UNCERTAINTY CATEGORY FOR VELOCITY
+#   uat2esnt.c:351-361         airborne positions sent as type code 18 or 22, which by definition carry NIC 0
+#   readsb track.c:2188        ADS-B version cleared for ADS-R, so "version" never appears in the JSON
+# NACp, SIL and SDA reach the aggregator only through the FAA's own rebroadcast status messages.
+ADSR_UNRELIABLE = ("nac_v", "nic")
 
 
 def is_evaluated(ac):
@@ -68,9 +76,12 @@ def check_performance(ac):
     don't always decode the message that carries it.
     """
     results = []
+    adsr = ac.get("type") == "adsr_icao"
     for field, minimum, para, bound in PERFORMANCE_CHECKS:
         value = ac.get(field)
-        if not isinstance(value, int):
+        if adsr and field in ADSR_UNRELIABLE:
+            status = EXCLUDED
+        elif not isinstance(value, int):
             status = NOT_REPORTED
         else:
             status = PASS if value >= minimum else FAIL
