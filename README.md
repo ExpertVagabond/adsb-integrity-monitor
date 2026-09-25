@@ -11,6 +11,8 @@ checked against independent sources: a weather model for the altitude physics, F
 rule applies, the FAA registry for aircraft age and certification, and the decoder's source code for how each
 value is produced.
 
+**Live map report:** [adsb-integrity-monitor.pages.dev](https://adsb-integrity-monitor.pages.dev/) (one hour, 812 aircraft; identities pseudonymized).
+
 The project is built the way an FAA systems engineering program would build it, with the documents first and
 every requirement traced to a test:
 
