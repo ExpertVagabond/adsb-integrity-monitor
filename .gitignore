@@ -7,3 +7,4 @@ data/registry-*.csv
 *.zip
 captures/*.jsonl
 !captures/acy-2026-09-25.jsonl
+.wrangler/
