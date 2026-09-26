@@ -31,6 +31,8 @@ observations, not determinations (ConOps §5).
 | Report | `aim/report.py` | Merge snapshots, run checks, write Markdown and CSV, redaction | SYS-040 to SYS-043 |
 | HTML report | `aim/htmlreport.py` | Self-contained page with SVG track map colored by verdict | SYS-045 |
 | Traceability | `aim/rtm.py` | Build docs/RTM.md from requirement IDs and test tags; fail on gaps | SYS-050 |
+| Trend | `aim/trend.py` | Re-analyze many captures; per-capture summary; repeat failures and altitude flags across captures | SYS-053, SYS-054 |
+| Weekly trend | `.github/workflows/weekly-trend.yml` | Downloads the last 7 daily captures and runs the trend | SYS-055 |
 | ReqIF export | `aim/reqif.py` | Requirements + verification links as ReqIF 1.2 for DOORS Next, Jama, Polarion | SYS-052 |
 | CI | `.github/workflows/ci.yml` | Tests + traceability gate on Python 3.10/3.12/3.13 for every push | SYS-051 |
 | CLI | `aim/__main__.py` | `collect`, `analyze`, `rtm` commands | all |

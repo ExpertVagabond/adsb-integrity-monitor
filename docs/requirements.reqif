@@ -98,7 +98,7 @@
                 <ATTRIBUTE-DEFINITION-STRING-REF>ad-id</ATTRIBUTE-DEFINITION-STRING-REF>
               </DEFINITION>
             </ATTRIBUTE-VALUE-STRING>
-            <ATTRIBUTE-VALUE-STRING THE-VALUE="The system shall store each poll as one timestamped JSON Lines record so analysis can be replayed offline.">
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="The system shall store each poll as one timestamped JSON Lines record, including the capture area (center and radius), so analysis can be replayed offline.">
               <DEFINITION>
                 <ATTRIBUTE-DEFINITION-STRING-REF>ad-text</ATTRIBUTE-DEFINITION-STRING-REF>
               </DEFINITION>
@@ -118,7 +118,7 @@
                 <ATTRIBUTE-DEFINITION-STRING-REF>ad-source</ATTRIBUTE-DEFINITION-STRING-REF>
               </DEFINITION>
             </ATTRIBUTE-VALUE-STRING>
-            <ATTRIBUTE-VALUE-STRING THE-VALUE="tests/test_feed.py::test_each_poll_is_one_replayable_record; tests/test_report.py::test_indicators_judged_across_snapshots">
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="tests/test_feed.py::test_each_poll_is_one_replayable_record; tests/test_report.py::test_indicators_judged_across_snapshots; tests/test_trend.py::test_captures_record_their_area">
               <DEFINITION>
                 <ATTRIBUTE-DEFINITION-STRING-REF>ad-verified</ATTRIBUTE-DEFINITION-STRING-REF>
               </DEFINITION>
@@ -1191,7 +1191,7 @@
                 <ATTRIBUTE-DEFINITION-STRING-REF>ad-source</ATTRIBUTE-DEFINITION-STRING-REF>
               </DEFINITION>
             </ATTRIBUTE-VALUE-STRING>
-            <ATTRIBUTE-VALUE-STRING THE-VALUE="tests/test_report.py::test_identities_replaced_with_stable_pseudonyms; tests/test_v2.py::test_html_respects_redaction; tests/test_v2.py::test_csv_never_leaks_internal_key; tests/test_watch.py::test_redacted_alerts_hide_identity">
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="tests/test_report.py::test_identities_replaced_with_stable_pseudonyms; tests/test_trend.py::test_markdown_redacts_and_reports_rate; tests/test_v2.py::test_html_respects_redaction; tests/test_v2.py::test_csv_never_leaks_internal_key; tests/test_watch.py::test_redacted_alerts_hide_identity">
               <DEFINITION>
                 <ATTRIBUTE-DEFINITION-STRING-REF>ad-verified</ATTRIBUTE-DEFINITION-STRING-REF>
               </DEFINITION>
@@ -1386,6 +1386,80 @@
             <SPEC-OBJECT-TYPE-REF>sot-requirement</SPEC-OBJECT-TYPE-REF>
           </TYPE>
         </SPEC-OBJECT>
+        <SPEC-OBJECT IDENTIFIER="SYS-053" LAST-CHANGE="2026-09-25T00:00:00Z" LONG-NAME="SYS-053">
+          <VALUES>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="SYS-053">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-id</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="The system shall re-analyze any set of captures with the current rules and report, per capture in time order: area, duration, aircraft, pass rate, high-confidence and low-confidence failures, failures inside rule airspace, not-evaluable and ADS-R counts, interference clusters and altitude outliers.">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-text</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="Reporting">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-section</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="Test">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-method</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="Shortfall Analysis recommendation 1">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-source</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="tests/test_trend.py::test_one_row_per_capture_in_time_order; tests/test_trend.py::test_markdown_redacts_and_reports_rate; tests/test_trend.py::test_old_captures_without_area_still_work">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-verified</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+          </VALUES>
+          <TYPE>
+            <SPEC-OBJECT-TYPE-REF>sot-requirement</SPEC-OBJECT-TYPE-REF>
+          </TYPE>
+        </SPEC-OBJECT>
+        <SPEC-OBJECT IDENTIFIER="SYS-054" LAST-CHANGE="2026-09-25T00:00:00Z" LONG-NAME="SYS-054">
+          <VALUES>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="SYS-054">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-id</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="Across captures, the system shall list every aircraft with a high-confidence failure, and every aircraft flagged by the altitude check, with its record in each capture where it was seen, ranking aircraft flagged in more captures first.">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-text</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="Reporting">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-section</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="Test">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-method</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="Shortfall Analysis recommendation 1">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-source</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="tests/test_trend.py::test_recurring_failure_ranks_first; tests/test_trend.py::test_markdown_redacts_and_reports_rate">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-verified</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+          </VALUES>
+          <TYPE>
+            <SPEC-OBJECT-TYPE-REF>sot-requirement</SPEC-OBJECT-TYPE-REF>
+          </TYPE>
+        </SPEC-OBJECT>
         <SPEC-OBJECT IDENTIFIER="SYS-050" LAST-CHANGE="2026-09-25T00:00:00Z" LONG-NAME="SYS-050">
           <VALUES>
             <ATTRIBUTE-VALUE-STRING THE-VALUE="SYS-050">
@@ -1488,6 +1562,43 @@
               </DEFINITION>
             </ATTRIBUTE-VALUE-STRING>
             <ATTRIBUTE-VALUE-STRING THE-VALUE="tests/test_reqif.py::test_every_requirement_exported_in_order; tests/test_reqif.py::test_identifiers_unique_and_references_resolve; tests/test_reqif.py::test_attribute_values_carry_requirement_content; tests/test_reqif.py::test_export_is_deterministic_and_committed_copy_is_current; tests/test_reqif.py::test_header_declares_reqif_1_0_content">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-verified</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+          </VALUES>
+          <TYPE>
+            <SPEC-OBJECT-TYPE-REF>sot-requirement</SPEC-OBJECT-TYPE-REF>
+          </TYPE>
+        </SPEC-OBJECT>
+        <SPEC-OBJECT IDENTIFIER="SYS-055" LAST-CHANGE="2026-09-25T00:00:00Z" LONG-NAME="SYS-055">
+          <VALUES>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="SYS-055">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-id</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="A scheduled weekly workflow shall download the most recent 7 daily captures, run the trend analysis with identities redacted, and publish the result as a build artifact, using read-only repository permissions.">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-text</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="Engineering">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-section</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="Test">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-method</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="Shortfall Analysis recommendation 1">
+              <DEFINITION>
+                <ATTRIBUTE-DEFINITION-STRING-REF>ad-source</ATTRIBUTE-DEFINITION-STRING-REF>
+              </DEFINITION>
+            </ATTRIBUTE-VALUE-STRING>
+            <ATTRIBUTE-VALUE-STRING THE-VALUE="tests/test_v2.py::test_weekly_trend_workflow">
               <DEFINITION>
                 <ATTRIBUTE-DEFINITION-STRING-REF>ad-verified</ATTRIBUTE-DEFINITION-STRING-REF>
               </DEFINITION>
@@ -1721,6 +1832,16 @@
                 <SPEC-OBJECT-REF>SYS-048</SPEC-OBJECT-REF>
               </OBJECT>
             </SPEC-HIERARCHY>
+            <SPEC-HIERARCHY IDENTIFIER="h-SYS-053" LAST-CHANGE="2026-09-25T00:00:00Z">
+              <OBJECT>
+                <SPEC-OBJECT-REF>SYS-053</SPEC-OBJECT-REF>
+              </OBJECT>
+            </SPEC-HIERARCHY>
+            <SPEC-HIERARCHY IDENTIFIER="h-SYS-054" LAST-CHANGE="2026-09-25T00:00:00Z">
+              <OBJECT>
+                <SPEC-OBJECT-REF>SYS-054</SPEC-OBJECT-REF>
+              </OBJECT>
+            </SPEC-HIERARCHY>
             <SPEC-HIERARCHY IDENTIFIER="h-SYS-050" LAST-CHANGE="2026-09-25T00:00:00Z">
               <OBJECT>
                 <SPEC-OBJECT-REF>SYS-050</SPEC-OBJECT-REF>
@@ -1734,6 +1855,11 @@
             <SPEC-HIERARCHY IDENTIFIER="h-SYS-052" LAST-CHANGE="2026-09-25T00:00:00Z">
               <OBJECT>
                 <SPEC-OBJECT-REF>SYS-052</SPEC-OBJECT-REF>
+              </OBJECT>
+            </SPEC-HIERARCHY>
+            <SPEC-HIERARCHY IDENTIFIER="h-SYS-055" LAST-CHANGE="2026-09-25T00:00:00Z">
+              <OBJECT>
+                <SPEC-OBJECT-REF>SYS-055</SPEC-OBJECT-REF>
               </OBJECT>
             </SPEC-HIERARCHY>
             <SPEC-HIERARCHY IDENTIFIER="h-SYS-060" LAST-CHANGE="2026-09-25T00:00:00Z">

@@ -10,7 +10,7 @@ is left unverified.
 | ID | Requirement | Method | Source |
 |---|---|---|---|
 | SYS-001 | The system shall retrieve ADS-B state data for a circular area defined by a center latitude/longitude and a radius of up to 250 NM from the adsb.lol v2 API. | D | ConOps 3.1 |
-| SYS-002 | The system shall store each poll as one timestamped JSON Lines record so analysis can be replayed offline. | T | ConOps 3.1 |
+| SYS-002 | The system shall store each poll as one timestamped JSON Lines record, including the capture area (center and radius), so analysis can be replayed offline. | T | ConOps 3.1 |
 | SYS-003 | The system shall not poll the public API more often than once every 5 seconds. | T | ConOps 5 |
 | SYS-004 | The system shall continue a capture when an individual poll fails, logging the failure. | T | ConOps 5 |
 | SYS-005 | The system shall read captures stored either as plain JSON Lines or gzip-compressed (.jsonl.gz). | T | Architecture 4 |
@@ -60,6 +60,8 @@ is left unverified.
 | SYS-046 | Watch mode shall alert when an evaluated aircraft first shows an emergency code or emergency status, or changes to a different one, and shall not repeat the alert while it is unchanged. | T | 91.227(d)(9) |
 | SYS-047 | Watch mode shall alert when an aircraft's 91.227(c)(1) result changes from pass to fail or fail to pass, or fails when first seen; it shall stay silent for steady aircraft, excluded targets and incomplete records. | T | ConOps 6 |
 | SYS-048 | Watch mode shall confirm a pass/fail change only after it holds for a configurable number of consecutive polls (default 2), and shall record a failure that clears before confirmation as a TRANSIENT event instead of discarding it. | T | Alert-fatigue finding, first live watch run |
+| SYS-053 | The system shall re-analyze any set of captures with the current rules and report, per capture in time order: area, duration, aircraft, pass rate, high-confidence and low-confidence failures, failures inside rule airspace, not-evaluable and ADS-R counts, interference clusters and altitude outliers. | T | Shortfall Analysis recommendation 1 |
+| SYS-054 | Across captures, the system shall list every aircraft with a high-confidence failure, and every aircraft flagged by the altitude check, with its record in each capture where it was seen, ranking aircraft flagged in more captures first. | T | Shortfall Analysis recommendation 1 |
 
 ## Engineering
 
@@ -68,4 +70,5 @@ is left unverified.
 | SYS-050 | The build shall generate the traceability matrix from test tags and fail if any requirement is unverified. | T | This document |
 | SYS-051 | Continuous integration shall run the test suite and the traceability gate on every push, and fail if the committed RTM differs from the generated one. | T | This document |
 | SYS-052 | The system shall export every requirement, its section, verification method, source and verifying tests as a ReqIF 1.2 file that validates against the OMG schema, with every internal reference resolving; CI shall fail if the committed export differs from a fresh one. | T | Tool interchange (DOORS, Jama, Polarion) |
+| SYS-055 | A scheduled weekly workflow shall download the most recent 7 daily captures, run the trend analysis with identities redacted, and publish the result as a build artifact, using read-only repository permissions. | T | Shortfall Analysis recommendation 1 |
 | SYS-060 | The system shall use only the Python standard library at runtime. | I | Architecture 4 |

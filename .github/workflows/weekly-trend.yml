@@ -1,0 +1,43 @@
+name: weekly-trend
+
+# Every Monday: download the last 7 successful daily captures, re-analyze them together with the
+# current rules, and keep the trend report as a build artifact. Read-only; nothing is committed.
+
+on:
+  schedule:
+    - cron: "0 19 * * 1"   # Mondays 19:00 UTC, after that day's 17:00 capture
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  trend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Download the last 7 daily captures
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p daily
+          for id in $(gh run list --workflow daily-capture.yml --status success --limit 7 --json databaseId --jq '.[].databaseId'); do
+            gh run download "$id" -D "daily/$id" || echo "run $id: no artifact (expired?)"
+          done
+          find daily -name 'capture-*.jsonl.gz' | sort
+      - name: Build registry lookup (aircraft facts only, discarded with the runner)
+        run: python -m aim registry --out registry-aircraft.csv
+      - name: Trend (redacted)
+        run: |
+          python -m aim trend daily --redact --airspace data/airspace-nyphl.json \
+            --registry registry-aircraft.csv --outdir trend
+      - uses: actions/upload-artifact@v7
+        with:
+          name: trend-${{ github.run_id }}
+          path: trend/
+          retention-days: 90

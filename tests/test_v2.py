@@ -169,6 +169,18 @@ class HtmlTests(unittest.TestCase):
         self.assertNotIn("def456", text)
 
 
+class WeeklyTrendWorkflowTests(unittest.TestCase):
+    def test_weekly_trend_workflow(self):
+        # verifies: SYS-055
+        wf = (ROOT / ".github" / "workflows" / "weekly-trend.yml").read_text()
+        self.assertIn("--workflow daily-capture.yml --status success --limit 7", wf)
+        self.assertIn("python -m aim trend daily --redact", wf)
+        self.assertIn("contents: read", wf)
+        self.assertIn("actions: read", wf)
+        self.assertNotIn("contents: write", wf)
+        self.assertIn("upload-artifact", wf)
+
+
 class CiTests(unittest.TestCase):
     def test_ci_runs_tests_and_traceability_gate(self):
         # verifies: SYS-051

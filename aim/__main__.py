@@ -4,7 +4,7 @@ import argparse
 import pathlib
 import sys
 
-from . import airspace, feed, htmlreport, registry, report, reqif, rtm, watch, weather
+from . import airspace, feed, htmlreport, registry, report, reqif, rtm, trend, watch, weather
 
 
 def main(argv=None):
@@ -47,6 +47,13 @@ def main(argv=None):
     rg = sub.add_parser("registry", help="download the FAA registry and build an aircraft-facts lookup (no owner data)")
     rg.add_argument("--zip", help="use an already-downloaded ReleasableAircraft.zip instead of downloading")
     rg.add_argument("--out", required=True)
+
+    tr = sub.add_parser("trend", help="re-analyze many captures and track results and repeat failures over time")
+    tr.add_argument("inputs", nargs="+", help="capture files or directories (searched for *.jsonl and *.jsonl.gz)")
+    tr.add_argument("--airspace", help="airspace JSON from `aim airspace`")
+    tr.add_argument("--registry", help="aircraft lookup CSV from `aim registry`")
+    tr.add_argument("--redact", action="store_true", help="pseudonymize aircraft in the output")
+    tr.add_argument("--outdir", default="reports/trend")
 
     sub.add_parser("rtm", help="regenerate docs/RTM.md; fails if any requirement is unverified")
     sub.add_parser("reqif", help="export the requirements and verification links as ReqIF 1.2 (DOORS, Jama, Polarion)")
@@ -106,6 +113,24 @@ def main(argv=None):
     if args.cmd == "reqif":
         path, n = reqif.write(".")
         print(f"{n} requirements -> {path}")
+        return 0
+
+    if args.cmd == "trend":
+        paths = []
+        for item in args.inputs:
+            pth = pathlib.Path(item)
+            paths += sorted(pth.rglob("*.jsonl")) + sorted(pth.rglob("*.jsonl.gz")) if pth.is_dir() else [pth]
+        if not paths:
+            print("no captures found", file=sys.stderr)
+            return 1
+        rows, recur, alt_recur = trend.build(paths, airspace.load(args.airspace) if args.airspace else None,
+                                  registry.load(args.registry) if args.registry else None)
+        out = pathlib.Path(args.outdir)
+        out.mkdir(parents=True, exist_ok=True)
+        (out / "trend.md").write_text(trend.to_markdown(rows, recur, args.redact, alt_recur), encoding="utf-8")
+        (out / "trend.html").write_text(trend.to_html(rows, recur, args.redact, alt_recur), encoding="utf-8")
+        trend.to_csv(rows, out / "trend.csv")
+        print(f"{len(rows)} captures -> {out}/trend.md, trend.html, trend.csv")
         return 0
 
     if args.cmd == "rtm":

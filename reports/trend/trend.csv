@@ -1,0 +1,4 @@
+capture,start_utc,minutes,area,snapshots,aircraft,pass,pass_pct,fail,fail_high_conf,fail_high_conf_in_rule,incomplete,not_evaluable,adsr,interference_events,interference_clusters,altitude_outliers
+acy-2026-09-25.jsonl,2026-09-25 13:55,5,not recorded,29,96,92,95.83,1,1,0,2,1,2,0,0,1
+nyphl-100nm-1h.jsonl.gz,2026-09-25 16:49,60,not recorded,240,812,801,98.65,5,2,1,2,4,8,23,0,0
+capture-2026-09-25.jsonl.gz,2026-09-25 17:53,30,not recorded,120,603,593,98.34,1,0,0,4,5,4,15,0,3

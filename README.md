@@ -19,7 +19,7 @@ every requirement traced to a test:
 | Document | What it covers |
 |---|---|
 | [01 Concept of Operations](docs/01-ConOps.md) | Purpose, shortfall, users, operational constraints |
-| [02 System Requirements](docs/02-Requirements.md) | 40 numbered "shall" statements with verification method and source |
+| [02 System Requirements](docs/02-Requirements.md) | 43 numbered "shall" statements with verification method and source |
 | [03 Architecture and ICD](docs/03-Architecture-ICD.md) | Components, interface definitions, design decisions |
 | [04 Trade Study](docs/04-Trade-Study.md) | Weighted comparison of five ADS-B data sources, with live measurements |
 | [05 Shortfall Analysis](docs/05-Shortfall-Analysis.md) | Required vs observed ADS-B performance in the New York / Philadelphia area, from a one-hour capture |
@@ -106,6 +106,9 @@ python3 -m aim analyze captures/acy.jsonl --redact --weather --airspace data/air
 # live monitoring: alerts on emergencies and on integrity changes, until Ctrl-C
 python3 -m aim watch --lat 39.4576 --lon -74.5772 --radius 60 --redact
 
+# trend across captures: re-analyze with current rules, track repeat failures
+python3 -m aim trend captures/ --redact --airspace data/airspace-nyphl.json --outdir reports/trend
+
 # export requirements for a requirements database (ReqIF 1.2)
 python3 -m aim reqif
 
@@ -116,7 +119,7 @@ python3 -m aim rtm
 
 Captures can be stored gzip-compressed (`.jsonl.gz`); `analyze` reads either form. A scheduled workflow
 (`daily-capture`) records 30 minutes around ACY every day on GitHub's runners and keeps the capture and report as
-a 90-day build artifact.
+a 90-day build artifact, and a `weekly-trend` workflow combines the last seven into a trend report every Monday.
 
 ## Limits
 

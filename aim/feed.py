@@ -78,14 +78,17 @@ class FeedHealth:
         return warning
 
 
-def to_record(body, polled_at):
-    """Normalize one API body into the snapshot record we store (SYS-002)."""
+def to_record(body, polled_at, area=None):
+    """Normalize one API body into the snapshot record we store (SYS-002). `area` = (lat, lon, radius_nm)."""
     now = body.get("now")
-    return {
+    rec = {
         "polled_at": polled_at,
         "feed_time": now / 1000.0 if isinstance(now, (int, float)) else polled_at,
         "ac": body.get("ac") or [],
     }
+    if area:
+        rec["area"] = {"lat": area[0], "lon": area[1], "radius_nm": area[2]}
+    return rec
 
 
 def effective_interval(requested_s):
@@ -110,7 +113,7 @@ def collect(lat, lon, radius_nm, polls, interval_s, out_path, fetcher=fetch, sle
             except Exception as exc:  # keep the capture going; a missed poll is itself data
                 log(f"poll {i + 1}/{polls}: fetch failed: {exc}")
             else:
-                rec = to_record(body, started)
+                rec = to_record(body, started, (lat, lon, radius_nm))
                 fh.write(json.dumps(rec, separators=(",", ":")) + "\n")
                 fh.flush()
                 written += 1
