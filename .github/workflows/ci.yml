@@ -29,5 +29,5 @@ jobs:
           python -m aim reqif
           git diff --exit-code docs/requirements.reqif
           command -v xmllint || (sudo apt-get update -qq && sudo apt-get install -y -qq libxml2-utils)
-          curl -sSfL -o /tmp/reqif.xsd https://www.omg.org/spec/ReqIF/20110401/reqif.xsd
-          xmllint --noout --schema /tmp/reqif.xsd docs/requirements.reqif
+          # Offline on purpose: the schema's imports once failed to download from omg.org mid-run.
+          XML_CATALOG_FILES=schemas/reqif/catalog.xml xmllint --nonet --noout --schema schemas/reqif/reqif.xsd docs/requirements.reqif
